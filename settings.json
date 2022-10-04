@@ -1,0 +1,10 @@
+{
+    "spotify_client_id": "<CLIENT ID>",
+    "spotify_client_secret": "<CLIENT SECRET>",
+    "playlists": [
+        "spotify:playlist:7olpTqGzGrYuI76ZBlCLgs",
+        "spotify:playlist:6QUKO8kPxjjMZaqh19DTkB",
+        "spotify:playlist:3fCwL4ZuJxhOzzVACcAa6J",
+        "spotify:playlist:5hHOERPmWzbwF5BZOlf660"
+    ]
+}

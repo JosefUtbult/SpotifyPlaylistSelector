@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/spotifyplayer.css') }}">
+    <script src="{{ url_for('static', filename='js/button.js') }}"></script>
+</head>
+<body>
+<div class="container center">
+    <div class="row">
+        <h1>Spotify Playlist Selector</h1>            
+    </div>
+    <div class="row container button-container">
+        {% for playlist in playlists %}
+        <button class="button playlist-button" onclick="changeButtonState(this, '{{ url_for('play') }}')" uri="{{ playlist['uri'] }}" state="false">{{ playlist['name'] }}</input>
+        {% endfor %}
+    </div>
+</div>
+<footer>
+    <p><i>Spotify Playlist Selector</i> by Josef Utbult</p>
+    <p><a href="#">Project Repository</a></p>
+  </footer> 
+</body>
+</html> 

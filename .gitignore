@@ -1,0 +1,6 @@
+.cache
+.venv/
+__pycache__/
+.vscode
+settings.json
+SpotifyPlaylistSelector.log

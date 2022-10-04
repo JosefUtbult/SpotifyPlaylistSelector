@@ -1,0 +1,45 @@
+:root {
+    --active: #33C3F0;
+    --changing: #a6ceda6b;
+    --off: rgba(231, 231, 231, 0.288);
+}
+
+body {
+    min-height: 95vh;
+}
+
+.center {
+    text-align: center;
+}
+
+.button-container {
+    width: 100%;
+    justify-content: center;
+}
+
+.playlist-button {
+    margin-right: 0.4vw;
+    margin-left: 0.4vw;
+    background-color: var(--off);
+    opacity: 0.9;
+    transition: opacity 100ms linear, background-color 400ms linear, color 400ms linear;
+}
+
+.playlist-button:hover {
+    opacity: 1;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    padding-left: 1vw;
+    padding-bottom: 0.5vh;
+}
+
+footer p {
+    margin-bottom: 4px;
+}
+
+footer p a {
+    margin-bottom: 0;
+}
