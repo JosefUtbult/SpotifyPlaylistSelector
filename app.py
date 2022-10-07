@@ -40,7 +40,7 @@ def pause():
 @app.route('/setcookie', methods = ['POST'])
 def setcookie():
     try:
-        settings = request.form['nm']
+        settings = request.get_json(force=True)
 
         resp = flask.make_response(flask.jsonify([]))
         resp.set_cookie('settings', settings)

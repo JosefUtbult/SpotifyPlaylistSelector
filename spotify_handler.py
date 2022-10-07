@@ -23,7 +23,7 @@ class SpotifyHandler:
             logger.info(self.sp)
 
     # Generates a spotify client that either runs in the browser or headless
-    def create_spotipy_handler(self, client_id:str, client_secret:str, headless:bool) -> spotipy.Spotify:  
+    def create_spotipy_handler(self, client_id:str, client_secret:str, headless:bool) -> spotipy.Spotify | None:  
         sp = spotipy.Spotify(
                 client_credentials_manager=SpotifyOAuth(
                     scope="user-read-playback-state,user-modify-playback-state", 
@@ -33,26 +33,33 @@ class SpotifyHandler:
                     redirect_uri=SPOTIFY_CLIENT_REDIRECT_URI
                 )
             )
-
-        sp.me()
-        return sp
+        try:
+            sp.current_user()
+            return sp
+        except spotipy.oauth2.SpotifyOauthError as e:
+            self.logger.error(f"Unable to create client: {e}")
+            return None
 
     # Pulls the name of a playlist by its uri
     def get_playlist_name(self, playlist_uri:str, client_id=None, client_secret=None, headless:bool=False) -> str:
         if not self.sp and client_secret and client_id:
-            return self.create_spotipy_handler(client_id, client_secret, headless).sp.playlist(playlist_uri)['name']
+            sp = self.create_spotipy_handler(client_id, client_secret, headless)
+            if not sp:
+                return ""
         elif self.sp:
-            print(self.sp)
-            name = self.sp.playlist(playlist_uri)['name']
-            return name
+            sp = self.sp
         else:
             self.logger.error('"get_playlist_name" called without sp or client info')
             return ""
+
+        return sp.playlist(playlist_uri)['name']
 
     # Pulls all tracks from a playlist and extracts their 
     def get_tracks_in_playlist(self, playlist_uri:str, client_id=None, client_secret=None, headless:bool=False):
         if not self.sp and client_secret and client_id:
             sp = self.create_spotipy_handler(client_id, client_secret, headless)
+            if not sp:
+                return ""
         elif self.sp:
             sp = self.sp
         else:
@@ -82,10 +89,12 @@ class SpotifyHandler:
     def play_playlist(self, playlist_uri, shuffle=False, client_id=None, client_secret=None, headless:bool=False):
         if not self.sp and client_secret and client_id:
             sp = self.create_spotipy_handler(client_id, client_secret, headless)
+            if not sp:
+                return False
         elif self.sp:
             sp = self.sp
         else:
-            self.logger.error('"play_playlist" called without sp or client info')
+            self.logger.error('"get_playlist_name" called without sp or client info')
             return False
 
         playlist = self.get_tracks_in_playlist(playlist_uri, client_id, client_secret, headless)
@@ -137,7 +146,10 @@ class SpotifyHandler:
     def pause(self, client_id=None, client_secret=None, headless:bool=False):
         try:
             if not self.sp and client_secret and client_id:
-                self.create_spotipy_handler(client_id, client_secret, headless).pause_playback()
+                sp = self.create_spotipy_handler(client_id, client_secret, headless)
+                if not sp:
+                    return False
+                sp.pause_playback()
             elif self.sp:
                 return self.sp.pause_playback()
             else:
