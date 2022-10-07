@@ -1,10 +1,12 @@
 {
-    "spotify_client_id": "<CLIENT ID>",
-    "spotify_client_secret": "<CLIENT SECRET>",
+    "spotify_client_id": "19744915f0dc43ecb775987ea395d844",
+    "spotify_client_secret": "2cf1f9be8b474065aba1f8cfab79e85d",
+    "darkmode": true,
     "playlists": [
         "spotify:playlist:7olpTqGzGrYuI76ZBlCLgs",
         "spotify:playlist:6QUKO8kPxjjMZaqh19DTkB",
         "spotify:playlist:3fCwL4ZuJxhOzzVACcAa6J",
-        "spotify:playlist:5hHOERPmWzbwF5BZOlf660"
+        "spotify:playlist:5hHOERPmWzbwF5BZOlf660",
+        "spotify:playlist:0cunNjgONCVLqn2utcygml"
     ]
 }
