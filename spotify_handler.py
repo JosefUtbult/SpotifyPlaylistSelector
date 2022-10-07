@@ -12,6 +12,8 @@ class SpotifyHandler:
     def __init__(self, logger, client_id, client_secret, headless=False):
         self.logger = logger
 
+        logger.info(f"{client_id} {client_secret}")
+
         self.sp = spotipy.Spotify(
             client_credentials_manager=SpotifyOAuth(
                 scope="user-read-playback-state,user-modify-playback-state", 

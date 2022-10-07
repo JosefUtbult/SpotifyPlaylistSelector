@@ -55,7 +55,7 @@ if __name__ == '__main__':
         logger,
         client_id=settings['spotify_client_id'],
         client_secret=settings['spotify_client_secret'],
-        headless=False 
+        headless=True 
     )
 
-    app.run(debug=True, host='localhost', port=2000)
+    app.run(debug=True, use_reloader=False, host='localhost', port=2000)
