@@ -1,49 +1,47 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from flask import request
 import time
 import random
-import logging
 
-SPOTIFY_CLIENT_REDIRECT_URI = "https://localhost:2001/callback"
 TIME_RATE = 30 # Volume percentage / seconds
 
 class SpotifyHandler:
 
     # Initializes the Spotify handler. If no id or secret is given, it will ignore creating a static client
     # and instead presume this is done each call    
-    def __init__(self, logger:logging.Logger, client_id:str|None=None, client_secret:str|None=None, headless:bool=False) -> None:
+    def __init__(self, logger, client_id:str|None=None, client_secret:str|None=None, redirect_uri:str|None=None, headless:bool=False) -> None:
         self.logger = logger
 
-        if client_id and client_secret:
-            self.sp = self.create_spotipy_handler(client_secret, client_id, headless)
+        if client_id and client_secret and redirect_uri:
+            self.sp = self.create_spotipy_handler(client_id, client_secret, redirect_uri, headless)
         else:
             self.sp = None
 
-            logger.info(self.sp)
-
     # Generates a spotify client that either runs in the browser or headless
-    def create_spotipy_handler(self, client_id:str, client_secret:str, headless:bool) -> spotipy.Spotify | None:  
+    def create_spotipy_handler(self, client_id:str, client_secret:str, redirect_uri:str, headless:bool):  
+        # self.logger.warning(f"client_id: {client_id}, client_secret: {client_secret}, redirect_uri: {redirect_uri}")
         sp = spotipy.Spotify(
                 client_credentials_manager=SpotifyOAuth(
                     scope="user-read-playback-state,user-modify-playback-state", 
-                    open_browser=not headless, 
-                    client_id=client_id, 
+                    open_browser=not headless,
+                    client_id=client_id,
                     client_secret=client_secret, 
-                    redirect_uri=SPOTIFY_CLIENT_REDIRECT_URI
+                    redirect_uri=redirect_uri
                 )
             )
+        
         try:
             sp.current_user()
             return sp
         except spotipy.oauth2.SpotifyOauthError as e:
             self.logger.error(f"Unable to create client: {e}")
             return None
+        
 
     # Pulls the name of a playlist by its uri
-    def get_playlist_name(self, playlist_uri:str, client_id=None, client_secret=None, headless:bool=False) -> str:
-        if not self.sp and client_secret and client_id:
-            sp = self.create_spotipy_handler(client_id, client_secret, headless)
+    def get_playlist_name(self, playlist_uri:str, client_id:str|None=None, client_secret:str|None=None, redirect_uri:str|None=None, headless:bool=False) -> str:
+        if not self.sp and client_secret and client_id and redirect_uri:
+            sp = self.create_spotipy_handler(client_id, client_secret, redirect_uri, headless)
             if not sp:
                 return ""
         elif self.sp:
@@ -55,11 +53,11 @@ class SpotifyHandler:
         return sp.playlist(playlist_uri)['name']
 
     # Pulls all tracks from a playlist and extracts their 
-    def get_tracks_in_playlist(self, playlist_uri:str, client_id=None, client_secret=None, headless:bool=False):
-        if not self.sp and client_secret and client_id:
-            sp = self.create_spotipy_handler(client_id, client_secret, headless)
+    def get_tracks_in_playlist(self, playlist_uri:str, client_id:str|None=None, client_secret:str|None=None, redirect_uri:str|None=None, headless:bool=False):
+        if not self.sp and client_secret and client_id and redirect_uri:
+            sp = self.create_spotipy_handler(client_id, client_secret, redirect_uri, headless)
             if not sp:
-                return ""
+                return []
         elif self.sp:
             sp = self.sp
         else:
@@ -86,9 +84,15 @@ class SpotifyHandler:
 
     # Takes a playlist uri and tries to play it. If something already is playing it will fade it out,
     # switch playlist and fade in again
-    def play_playlist(self, playlist_uri, shuffle=False, client_id=None, client_secret=None, headless:bool=False):
-        if not self.sp and client_secret and client_id:
-            sp = self.create_spotipy_handler(client_id, client_secret, headless)
+    def play_playlist(self, playlist_uri, shuffle=False, client_id:str|None=None, client_secret:str|None=None, redirect_uri:str|None=None, headless:bool=False):
+        playlist = self.get_tracks_in_playlist(playlist_uri, client_id, client_secret, redirect_uri, headless)
+
+        # Just shuffle the playlist manually to get a shuffle
+        if shuffle:
+            random.shuffle(playlist)
+        
+        if not self.sp and client_secret and client_id and redirect_uri:
+            sp = self.create_spotipy_handler(client_id, client_secret, redirect_uri, headless)
             if not sp:
                 return False
         elif self.sp:
@@ -96,12 +100,6 @@ class SpotifyHandler:
         else:
             self.logger.error('"get_playlist_name" called without sp or client info')
             return False
-
-        playlist = self.get_tracks_in_playlist(playlist_uri, client_id, client_secret, headless)
-
-        # Just shuffle the playlist manually to get a shuffle
-        if shuffle:
-            random.shuffle(playlist)
 
         try:
             # Check if something already is playing
@@ -143,17 +141,25 @@ class SpotifyHandler:
         return True
 
     # Pause playback, regardless of which playlist is running at the moment
-    def pause(self, client_id=None, client_secret=None, headless:bool=False):
+    def pause(self, client_id:str|None=None, client_secret:str|None=None, redirect_uri:str|None=None, headless:bool=False):
+        if not self.sp and client_secret and client_id and redirect_uri:
+            sp = self.create_spotipy_handler(client_id, client_secret, redirect_uri, headless)
+            if not sp:
+                return False
+        elif self.sp:
+            sp = self.sp
+        else:
+            self.logger.error('"pause" called without sp or client info')
+            return False
+
         try:
-            if not self.sp and client_secret and client_id:
-                sp = self.create_spotipy_handler(client_id, client_secret, headless)
-                if not sp:
-                    return False
+            # Check if something already is playing
+            if not sp.current_playback():
+                self.logger.warning("No active device running")
+                return False
+
+            elif sp.current_playback()['is_playing']:
                 sp.pause_playback()
-            elif self.sp:
-                return self.sp.pause_playback()
-            else:
-                self.logger.error('"pause" called without sp or client info')
         except Exception as e:
             self.logger.error(f"Spotipy gave an exception: {e}")
             return False

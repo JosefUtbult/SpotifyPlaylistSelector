@@ -4,24 +4,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/spotifyplayer.css') }}">
-    <script src="{{ url_for('static', filename='js/button.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </head>
 <body class="{% if darkmode %}dark{% else %}light{% endif %}">
 <div class="container center">
     <div class="row">
         <h1>Spotify Playlist Selector</h1>            
     </div>
-    <div class="row container button-container">
-        {% for playlist in playlists %}
-        <button class="button playlist-button" onclick="changeButtonState(this, '{{ url_for('play') }}', '{{ url_for('pause') }}')" uri="{{ playlist['uri'] }}" state="false">{{ playlist['name'] }}</input>
-        {% endfor %}
-    </div>
+    <div id="button-container" class="row container button-container"></div>
+</div>
+<div>
+    <form action="">
+        <input type="file" id="settings-input" name="settings"></input>
+        <input class="button" type="button" onclick="setCookie()" value="Apply"></input>
+     </form>
+</div>
+<div>
+    <p id="status"></p>
 </div>
 <footer>
     <div class="flexbox-spread">
         <div>
             <p><i>Spotify Playlist Selector</i> by Josef Utbult</p>
-            <p><a href="#">Project Repository</a></p>
+            <p><a href="https://github.com/JosefUtbult/SpotifyPlaylistSelector">Project Repository</a></p>
         </div>
         <div class="flexbox-column-bottom">
             <label class="switch">
